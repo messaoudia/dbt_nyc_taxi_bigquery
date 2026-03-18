@@ -1,0 +1,3 @@
+# pip install --upgrade pip setuptools wheel
+dbt-core==1.11.7
+dbt-bigquery==1.11.1
