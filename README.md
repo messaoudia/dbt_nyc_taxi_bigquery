@@ -1,4 +1,4 @@
-# dbt
+# DBT NYC Taxi Data Project
 This project will help you have an overview on my knowledge on DBT
 The data modelization part of the project is still in progress but I will try to update it as much as possible in the next weeks, so stay tuned :)
 
