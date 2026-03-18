@@ -1,0 +1,6 @@
+sources:
+  - name: nyctaxi
+    schema: nyctaxi_raw_dev
+    tables:
+      - name: taxi_zone_lookup
+      - name: yellow_tripdata
