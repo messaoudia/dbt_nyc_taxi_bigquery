@@ -6,12 +6,21 @@ models:
     columns:
       - name: location_id
         description: "Unique TLC taxi zone identifier. Primary key."
+        data_tests:
+          - unique
+          - not_null
       - name: district
         description: "NYC borough name (Manhattan, Brooklyn, Queens, Bronx, Staten Island, EWR)."
+        data_tests:
+          - not_null
       - name: zone
         description: "TLC taxi zone name within the borough."
+        data_tests:
+          - not_null
       - name: service_zone
         description: "Service area category (Yellow Zone, Boro Zone, Airports)."
+        data_tests:
+          - not_null
 
   - name: stg_nyctaxi_raw__yellow_tripdata
     description: "Staged yellow taxi trip records from NYC TLC."
@@ -32,8 +41,18 @@ models:
         description: "Whether the trip was stored in memory before sending to the server. Y = yes, N = no."
       - name: fk_pickup_location_id
         description: "TLC taxi zone where the trip started. Foreign key to taxi_zone_lookup."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_nyctaxi_raw__taxi_zone_lookup')
+                field: location_id
       - name: fk_dropoff_location_id
         description: "TLC taxi zone where the trip ended. Foreign key to taxi_zone_lookup."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_nyctaxi_raw__taxi_zone_lookup')
+                field: location_id
       - name: payment_type
         description: "Payment method. 1 = Credit card, 2 = Cash, 3 = No charge, 4 = Dispute, 5 = Unknown."
       - name: fare_amount
