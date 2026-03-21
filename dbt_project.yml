@@ -31,7 +31,9 @@ vars:
 on-run-start:
   - "{{ create_if_not_exists_audits_table() }}"
   - "{{ insert_audit('on_run_start') }}"
-on-run-end: "{{ insert_audit('on_run_end') }}"
+on-run-end:
+  - "{{ insert_audit('on_run_end') }}"
+  - "{{ dbt_artifacts.upload_results(results) }}"
 
 models:
   dbt_nyc_taxi_bigquery:
@@ -46,3 +48,6 @@ models:
 
       nyctaxi:
         +materialized: table
+
+  dbt_artifacts:
+    +schema: dbt_artifacts

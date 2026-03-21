@@ -1,0 +1,4 @@
+# install with dbt deps
+packages:
+  - package: brooklyn-data/dbt_artifacts
+    version: 2.10.0
