@@ -49,11 +49,11 @@ models:
       +materialized: view
 
       nyctaxi:
-        +materialized: table
+        +materialized: view
 
     intermediate:
       +schema: intermediate
-      +materialized: table
+      +materialized: ephemeral
 
   dbt_artifacts:
     +schema: dbt_artifacts
