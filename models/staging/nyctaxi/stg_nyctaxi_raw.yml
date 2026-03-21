@@ -75,3 +75,73 @@ models:
         description: "Fee applied for pickups at JFK and LaGuardia airports."
       - name: cbd_congestion_fee
         description: "Congestion Relief Zone toll applied since January 2025 for trips entering the NYC central business district."
+
+  - name: stg_nyctaxi_raw__yellow_tripdata_details
+    description: "Staged yellow taxi trip records from NYC TLC."
+    columns:
+      - name: vendor_id
+        description: "TPEP provider ID. 1 = Creative Mobile Technologies, 2 = Curb Mobility, 6 = Myle Technologies, 7 = Helix."
+      - name: pickup_ts
+        description: "Date and time when the meter was engaged."
+      - name: dropoff_ts
+        description: "Date and time when the meter was disengaged."
+      - name: passenger_count
+        description: "Number of passengers in the vehicle, as reported by the driver."
+      - name: trip_distance
+        description: "Trip distance in miles reported by the taximeter."
+      - name: fk_rate_code_id
+        description: "Rate code at end of trip. 1 = Standard, 2 = JFK, 3 = Newark, 4 = Nassau/Westchester, 5 = Negotiated fare."
+      - name: store_and_fwd_flag
+        description: "Whether the trip was stored in memory before sending to the server. Y = yes, N = no."
+      - name: fk_pickup_location_id
+        description: "TLC taxi zone where the trip started. Foreign key to taxi_zone_lookup."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_nyctaxi_raw__taxi_zone_lookup')
+                field: location_id
+      - name: fk_dropoff_location_id
+        description: "TLC taxi zone where the trip ended. Foreign key to taxi_zone_lookup."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_nyctaxi_raw__taxi_zone_lookup')
+                field: location_id
+      - name: payment_type
+        description: "Payment method. 1 = Credit card, 2 = Cash, 3 = No charge, 4 = Dispute, 5 = Unknown."
+      - name: fare_amount
+        description: "Base fare calculated by the meter."
+      - name: extra
+        description: "Miscellaneous extras and surcharges (rush hour, overnight, etc.)."
+      - name: mta_tax
+        description: "MTA tax automatically triggered based on the metered rate in use."
+      - name: tip_amount
+        description: "Tip amount. Auto-populated for credit card tips. Cash tips not included."
+      - name: tolls_amount
+        description: "Total tolls paid during the trip."
+      - name: improvement_surcharge
+        description: "Surcharge funding taxi accessibility improvements. Fixed at $0.30 since 2015."
+      - name: congestion_surcharge
+        description: "New York State congestion surcharge applied to trips in the congestion zone."
+      - name: total_amount
+        description: "Total amount charged to the passenger, excluding cash tips."
+      - name: airport_fee
+        description: "Fee applied for pickups at JFK and LaGuardia airports."
+      - name: cbd_congestion_fee
+        description: "Congestion Relief Zone toll applied since January 2025 for trips entering the NYC central business district."
+      - name: pickup_state_id
+        description: "Pickup state identifier."
+      - name: pickup_state_name
+        description: "Pickup state name."
+        data_tests:
+          - is_nyc_location_only
+      - name: pickup_region
+        description: "Pickup region."
+      - name: dropoff_state_id
+        description: "Dropoff state identifier."
+      - name: dropoff_state_name
+        description: "Dropoff state name."
+        data_tests:
+          - is_nyc_location_only
+      - name: dropoff_region
+        description: "Dropoff region."
