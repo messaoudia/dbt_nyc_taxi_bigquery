@@ -63,6 +63,8 @@ models:
         description: "MTA tax automatically triggered based on the metered rate in use."
       - name: tip_amount
         description: "Tip amount. Auto-populated for credit card tips. Cash tips not included."
+        data_tests:
+          - max_tip_amount
       - name: tolls_amount
         description: "Total tolls paid during the trip."
       - name: improvement_surcharge
