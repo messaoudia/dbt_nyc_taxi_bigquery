@@ -1,29 +1,8 @@
 version: 2
 
 models:
-  - name: stg_nyctaxi_raw__taxi_zone_lookup
-    description: "{{ doc('stg_nyctaxi_raw__taxi_zone_lookup') }}"
-    columns:
-      - name: location_id
-        description: "{{ doc('col_location_id') }}"
-        data_tests:
-          - unique
-          - not_null
-      - name: district
-        description: "{{ doc('col_district') }}"
-        data_tests:
-          - not_null
-      - name: zone
-        description: "{{ doc('col_zone') }}"
-        data_tests:
-          - not_null
-      - name: service_zone
-        description: "{{ doc('col_service_zone') }}"
-        data_tests:
-          - not_null
-
-  - name: stg_nyctaxi_raw__yellow_tripdata
-    description: "{{ doc('stg_nyctaxi_raw__yellow_tripdata') }}"
+  - name: int_staging__yellow_tripdata_details
+    description: "{{ doc('int_staging__yellow_tripdata_details') }}"
     columns:
       - name: vendor_id
         description: "{{ doc('col_vendor_id') }}"
@@ -63,8 +42,6 @@ models:
         description: "{{ doc('col_mta_tax') }}"
       - name: tip_amount
         description: "{{ doc('col_tip_amount') }}"
-        data_tests:
-          - max_tip_amount
       - name: tolls_amount
         description: "{{ doc('col_tolls_amount') }}"
       - name: improvement_surcharge
@@ -77,4 +54,19 @@ models:
         description: "{{ doc('col_airport_fee') }}"
       - name: cbd_congestion_fee
         description: "{{ doc('col_cbd_congestion_fee') }}"
-
+      - name: pickup_state_id
+        description: "{{ doc('col_pickup_state_id') }}"
+      - name: pickup_state_name
+        description: "{{ doc('col_pickup_state_name') }}"
+        data_tests:
+          - is_nyc_location_only
+      - name: pickup_region
+        description: "{{ doc('col_pickup_region') }}"
+      - name: dropoff_state_id
+        description: "{{ doc('col_dropoff_state_id') }}"
+      - name: dropoff_state_name
+        description: "{{ doc('col_dropoff_state_name') }}"
+        data_tests:
+          - is_nyc_location_only
+      - name: dropoff_region
+        description: "{{ doc('col_dropoff_region') }}"

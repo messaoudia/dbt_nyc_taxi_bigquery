@@ -1,0 +1,6 @@
+sources:
+  - name: staging
+    schema: staging
+    tables:
+      - name: stg_nyctaxi_raw__taxi_zone_lookup
+      - name: stg_nyctaxi_raw__yellow_tripdata

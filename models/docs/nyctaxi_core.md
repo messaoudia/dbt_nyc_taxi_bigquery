@@ -23,7 +23,7 @@ Referential integrity between `fk_pickup_location_id` / `fk_dropoff_location_id`
 {% enddocs %}
 
 
-{% docs stg_nyctaxi_raw__yellow_tripdata_details %}
+{% docs int_staging__yellow_tripdata_details %}
 Enriched version of `stg_nyctaxi_raw__yellow_tripdata` with additional geographic information about pickup and dropoff zones.
 
 **Source:** `stg_nyctaxi_raw__yellow_tripdata` enriched via joins on `us_states` and `location_state` reference tables
