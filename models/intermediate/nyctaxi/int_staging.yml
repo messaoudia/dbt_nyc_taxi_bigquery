@@ -62,6 +62,12 @@ models:
           - is_nyc_location_only
       - name: pickup_region
         description: "{{ doc('col_pickup_region') }}"
+      - name: pickup_district
+        description: "{{ doc('col_pickup_district') }}"
+      - name: pickup_zone
+        description: "{{ doc('col_pickup_zone') }}"
+      - name: pickup_service_zone
+        description: "{{ doc('col_pickup_service_zone') }}"
       - name: dropoff_state_id
         description: "{{ doc('col_dropoff_state_id') }}"
       - name: dropoff_state_name
@@ -70,3 +76,9 @@ models:
           - is_nyc_location_only
       - name: dropoff_region
         description: "{{ doc('col_dropoff_region') }}"
+      - name: dropoff_district
+        description: "{{ doc('col_dropoff_district') }}"
+      - name: dropoff_zone
+        description: "{{ doc('col_dropoff_zone') }}"
+      - name: dropoff_service_zone
+        description: "{{ doc('col_dropoff_service_zone') }}"

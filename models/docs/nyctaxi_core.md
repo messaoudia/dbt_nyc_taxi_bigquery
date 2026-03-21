@@ -210,6 +210,18 @@ Pickup state name
 Pickup region name
 {% enddocs %}
 
+{% docs col_pickup_district %}
+Pickup district name
+{% enddocs %}
+
+{% docs col_pickup_zone %}
+Pickup zone name
+{% enddocs %}
+
+{% docs col_pickup_service_zone %}
+Pickup service zone name
+{% enddocs %}
+
 {% docs col_dropoff_state_id %}
 Dropoff state id
 {% enddocs %}
@@ -220,4 +232,16 @@ Dropoff state name
 
 {% docs col_dropoff_region %}
 Dropoff region name
+{% enddocs %}
+
+{% docs col_dropoff_district %}
+Dropoff district name
+{% enddocs %}
+
+{% docs col_dropoff_zone %}
+Dropoff zone name
+{% enddocs %}
+
+{% docs col_dropoff_service_zone %}
+Dropoff service zone name
 {% enddocs %}

@@ -1,0 +1,13 @@
+with tripdata_details as (
+    select * from {{ ref("int_staging__yellow_tripdata_details") }}
+),
+
+revenue_per_day as (
+    select
+        date(pickup_ts) as trip_day,
+        round(sum(total_amount), 2) as revenue
+    from tripdata_details
+    group by date(pickup_ts)
+)
+
+select trip_day, revenue from revenue_per_day

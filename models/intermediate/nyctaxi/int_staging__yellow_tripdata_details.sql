@@ -10,6 +10,10 @@ location_state as (
     select * from {{ ref("location_state") }}
 ),
 
+taxi_zone_lookup as (
+    select * from {{ ref("stg_nyctaxi_raw__taxi_zone_lookup") }}
+),
+
 location_us_states as (
     select
         location_state.location_id,
@@ -26,19 +30,32 @@ location_us_states as (
 tripdata_details as (
     select
         tripdata.*,
-        pickup.state_id as pickup_state_id,
-        pickup.name as pickup_state_name,
-        pickup.region as pickup_region,
-        dropoff.state_id as dropoff_state_id,
-        dropoff.name as dropoff_state_name,
-        dropoff.region as dropoff_region
+
+        pickup_states.state_id as pickup_state_id,
+        pickup_states.name as pickup_state_name,
+        pickup_states.region as pickup_region,
+        pickup_zone_lookup.district as pickup_district,
+        pickup_zone_lookup.zone as pickup_zone,
+        pickup_zone_lookup.service_zone as pickup_service_zone,
+
+        dropoff_states.state_id as dropoff_state_id,
+        dropoff_states.name as dropoff_state_name,
+        dropoff_states.region as dropoff_region,
+        dropoff_zone_lookup.district as dropoff_district,
+        dropoff_zone_lookup.zone as dropoff_zone,
+        dropoff_zone_lookup.service_zone as dropoff_service_zone,
 
     from tripdata
 
-    left join location_us_states as pickup on
-        tripdata.fk_pickup_location_id = pickup.location_id
-    left join location_us_states as dropoff on
-        tripdata.fk_pickup_location_id = dropoff.location_id
+    left join location_us_states as pickup_states on
+        tripdata.fk_pickup_location_id = pickup_states.location_id
+    left join location_us_states as dropoff_states on
+        tripdata.fk_dropoff_location_id = dropoff_states.location_id
+    left join taxi_zone_lookup as pickup_zone_lookup on
+        tripdata.fk_pickup_location_id = pickup_zone_lookup.location_id
+    left join taxi_zone_lookup as dropoff_zone_lookup on
+        tripdata.fk_dropoff_location_id = dropoff_zone_lookup.location_id
+
 )
 
 select * from tripdata_details

@@ -19,11 +19,11 @@ renamed as (
         fare_amount,
         extra,
         mta_tax,
-        tip_amount,
-        tolls_amount,
+        coalesce(cast(tip_amount as float64), 0.0) as tip_amount,
+        coalesce(cast(tolls_amount as float64), 0.0) as tolls_amount,
         improvement_surcharge,
         congestion_surcharge,
-        total_amount,
+        coalesce(cast(total_amount as float64), 0.0) as total_amount,
         Airport_fee as airport_fee,
         cbd_congestion_fee
     from source
