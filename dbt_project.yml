@@ -36,6 +36,8 @@ on-run-end:
   - "{{ dbt_artifacts.upload_results(results) }}"
 
 models:
+  +labels:
+    created_by: dbt
   dbt_nyc_taxi_bigquery:
     # Config indicated by + and applies to all files under models/staging/
     staging:
@@ -51,3 +53,7 @@ models:
 
   dbt_artifacts:
     +schema: dbt_artifacts
+
+seeds:
+  +labels:
+    created_by: dbt
