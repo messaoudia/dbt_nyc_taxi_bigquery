@@ -1,58 +1,131 @@
-# DBT NYC Taxi Data Project
-This project will help you have an overview on my knowledge on DBT
-The data modelization part of the project is still in progress but I will try to update it as much as possible in the next weeks, so stay tuned :)
+# dbt NYC Taxi · BigQuery
 
-The data we will use is NYC Taxi Data extracted through an IaC pipeline on GCP that I built and that you can find here :
-[messaoudia/nyc-taxi-gcp-pipeline](https://github.com/messaoudia/nyc-taxi-gcp-pipeline)
+![dbt](https://img.shields.io/badge/dbt--core-1.11.7-FF694B?logo=dbt&logoColor=white)
+![BigQuery](https://img.shields.io/badge/BigQuery-blue?logo=googlebigquery&logoColor=white)
+![GCP](https://img.shields.io/badge/GCP-4285F4?logo=googlecloud&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
+
+ELT transformation layer on NYC Yellow Taxi trip data, built with dbt-core on BigQuery.
+3-layer medallion architecture (staging → intermediate → marts), custom data quality macros, and full observability via dbt_artifacts.
+
+> Raw data is ingested via a separate IaC pipeline: [messaoudia/nyc-taxi-gcp-pipeline](https://github.com/messaoudia/nyc-taxi-gcp-pipeline)
 
 ## Disclaimers
 
 > [!NOTE]
-> DISCLAIMER #1: this project is in work in progress 🏗️
+> - ℹ️ This project is in work in progress 🏗️
+> - ✍️ Handwritten code — I can explain every technical decision in this codebase.
 
+---
 
-> [!IMPORTANT]
-> DISCLAIMER #2:
-> - This is NOT Vibe Coding at all !! A good developer keeps control of the code always of course IA was used and should be used to ease productivity but not to just code instead of the developer
-> - This is handwritting code by myself that I can explain 100%
+## Architecture
 
-## What is dbt ? my understanding
-DBT stands for Data Build Tool ;) and is an opensource data transformation tool (the T in ELT)
-It is meant to be used for ease the usage of raw data wharehouses.
-It helps data teams to connect and easily have a builtin modelization system inside of their raw data wharehouses. This avoids boilerplates SQL queries that are hardly maintenable to modelize data when data is becoming huge !
+```mermaid
+flowchart LR
+    subgraph Sources
+        RAW[(nyctaxi_raw_dev\nBigQuery)]
+        SEEDS[Seeds\nus_states\nlocation_state]
+    end
 
-Also it has a versionning system that helps data teams to track their evolution + test them making it easier to maintain + allows CI/CD.
+    subgraph Staging["Staging — views"]
+        STG1[stg_yellow_tripdata]
+        STG2[stg_taxi_zone_lookup]
+    end
 
-## DBT when to use it .. or not use it ?
-| Context | Use | Do Not |
-|---|---|---|
-| Tech stack | Cloud data warehouse (GCP BQ, Databricks, AWS Redshift, DuckDB for ex.) | All your data is in OLTP database like PSQL, MySQL, Oracle and is already "modelized"
-| Data volume | Large datasets to transform regularly | One-shot transformation, small scripts
-| Team | Data team with several skills/contributors (code review) | Solo work but who does that ? :D
-| Quality / CI/CD | Follow quality in time, versionning of transformations | No need of versionning + data testing ... bad practice !
+    subgraph Intermediate["Intermediate — views"]
+        INT[int_yellow_tripdata_details\nenriched with state & region]
+    end
 
-## Main commands
-> Init a project using dbt core (local only) https://docs.getdbt.com/reference/commands/init
+    subgraph Marts["Marts — tables"]
+        M1[finance/revenue_per_day]
+        M2[geo/trips_by_district]
+    end
 
-`dbt init`
+    subgraph Observability
+        ART[(dbt_artifacts\nBigQuery)]
+        AUD[(staging.dbt_audits)]
+    end
 
-> Debug project configuration
+    RAW --> STG1 & STG2
+    STG1 & STG2 & SEEDS --> INT
+    INT --> M1 & M2
+    INT -->|on-run-end| ART
+    STG1 -->|pre/post hook| AUD
+```
 
-`dbt debug`
+---
 
-> Run all models
+## Layers at a glance
 
-`dbt run`
+| Layer | Models | Materialization | What happens here |
+| --- | --- | --- | --- |
+| **Staging** | `stg_yellow_tripdata`, `stg_taxi_zone_lookup` | View | Column renaming, null coalescing, FK tagging. No business logic. |
+| **Intermediate** | `int_yellow_tripdata_details` | View | Enrichment via 2× joins on zone lookup + 2 seeds (state, region) |
+| **Marts** | `revenue_per_day`, `trips_by_district` | Table | Aggregations for analytics consumers |
+| **Seeds** | `us_states`, `location_state` | Table | Version-controlled reference data (265 TLC zones → US states) |
+
+**Why views for staging/intermediate?** Storage cost stays at zero — these are never queried directly by end users. Tables only where query performance matters (marts).
+
+---
+
+## Testing & Data Quality
+
+Built-in tests: `unique`, `not_null`, `relationships` on PKs and FKs across all layers.
+
+Custom macro tests encoding business rules:
+
+| Test | Model | Rule |
+| --- | --- | --- |
+| `max_tip_amount` | `stg_yellow_tripdata` | `tip_amount > $1200` → anomaly (variable-configurable) |
+| `is_nyc_location_only` | `int_yellow_tripdata_details` | All trips must originate/terminate in New York State |
+
+```yaml
+# dbt_project.yml — threshold exposed as variable, not hardcoded
+vars:
+  max_tip_amount: 1200
+```
+
+---
+
+## Observability
+
+- **Audit logging** — `create_if_not_exists_audits_table()` + `insert_audit()` macros called via `on-run-start`, `on-run-end`, and model-level pre/post hooks → every run is tracked in `staging.dbt_audits`
+- **dbt_artifacts** — [brooklyn-data/dbt_artifacts v2.10.0](https://github.com/brooklyn-data/dbt_artifacts) uploads execution metadata (run results, test results, model timing) to BigQuery after each run
+- **BigQuery labels** — all models and seeds carry `created_by: dbt` label for resource tracking and cost attribution
+
+---
+
+## When to use dbt
+
+| Context | Use dbt | Skip dbt |
+| --- | --- | --- |
+| Warehouse | BigQuery, Redshift, Databricks, DuckDB | OLTP (Postgres, MySQL) already modelized |
+| Volume | Large, regularly refreshed datasets | One-shot transformations, small scripts |
+| Team | Multi-contributor, code review, CI/CD | Solo... but who does that? :D |
+| Quality | Versioned transformations + data testing | No testing needs — bad practice anyway |
+
+---
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+
+# Configure your BigQuery profile in ~/.dbt/profiles.yml
+
+dbt debug          # check connection
+dbt deps           # install dbt_artifacts package
+dbt seed           # load reference tables
+dbt run            # build all models
+dbt test           # run all tests
+```
+
+---
 
 ## Sources
-- https://docs.getdbt.com/docs/introduction
-- https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview?version=1.12
-- https://docs.getdbt.com/best-practices/how-we-structure/2-staging?version=1.12
-- And a little bit of AI of course :)
 
-## Other Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+- [dbt introduction](https://docs.getdbt.com/docs/introduction)
+- [dbt best practices — project structure](https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview?version=1.12)
+- [dbt best practices — staging](https://docs.getdbt.com/best-practices/how-we-structure/2-staging?version=1.12)
+- [brooklyn-data/dbt_artifacts](https://github.com/brooklyn-data/dbt_artifacts)
+- NYC TLC trip record data
